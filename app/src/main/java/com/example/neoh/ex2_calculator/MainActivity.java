@@ -1,9 +1,12 @@
 package com.example.neoh.ex2_calculator;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -13,13 +16,16 @@ import android.text.SpannableString;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    //Switch Mode ;
+
+    Button bt_Mode;
     Button bt_0, bt_1, bt_2, bt_3, bt_4, bt_5, bt_6, bt_7, bt_8, bt_9, bt_Dot;
     Button bt_Psd, bt_Add, bt_Mul, bt_Div, bt_Sub;
     Button bt_Del, bt_AC, bt_Eql;
     TextView tv_Show;
 
     static char num[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
-    static char ope[] = {'=', '+', '-', '×', '÷', '(', ')','%'};
+    static char ope[] = {'=', '+', '-', '×', '÷', '%'};//,'(', ')','√','^'
 
     private String st_Hsty = new String("");//计算历史
     private String st_Pln = new String("");//当前计算式
@@ -34,9 +40,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         InitViews();
         setListener(this);
 
+//        Mode = findViewById(R.id.swtMode);
+//        Mode.setChecked(false);
+//        Mode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+//                if(!b) {
+//                    setContentView(R.layout.activity_adv_cal);
+//                }else{
+//                    setContentView(R.layout.activity_main);
+//                }
+//            }
+//        });
+
     }
 
     private void InitViews() {
+        bt_Mode = findViewById(R.id.bt_Mode);
+
         bt_0 = findViewById(R.id.bt_0);
         bt_1 = findViewById(R.id.bt_1);
         bt_2 = findViewById(R.id.bt_2);
@@ -63,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setListener(View.OnClickListener myLsn) {
+        bt_Mode.setOnClickListener(myLsn);
         bt_0.setOnClickListener(myLsn);
         bt_1.setOnClickListener(myLsn);
         bt_2.setOnClickListener(myLsn);
@@ -85,13 +107,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bt_AC.setOnClickListener(myLsn);
         bt_Eql.setOnClickListener(myLsn);
 
-        tv_Show = findViewById(R.id.tv_Show);
     }
 
 
     public void onClick(View v) {
         // TODO Auto-generated method stub
         switch (v.getId()) {
+            case R.id.bt_Mode: doClick_Mode(); break;
             case R.id.bt_0: doClick_0(); break;
             case R.id.bt_1: doClick_1(); break;
             case R.id.bt_2: doClick_2(); break;
@@ -111,7 +133,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_AC: doClick_AC(); break;
             case R.id.bt_Del:doClick_Del();break;
             case R.id.bt_Eql:doClick_Eql();break;
-
+//            case R.id.bt_Rt:doClick_Rt(); break;
+//            case R.id.bt_Pw: doClick_Pw(); break;
+//            case R.id.bt_LB:doClick_LB();break;
+//            case R.id.bt_RB:doClick_RB();break;
         }
     }
 
@@ -120,6 +145,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_Show.append(st_Pln + "\n");
         doCalculate();
         tv_Show.append(st_Rst);
+    }
+
+    private void doClick_Mode() {
+       Intent intent = new Intent(this,AdvCalAct.class);
+       startActivityForResult(intent,1);
     }
 
     private void doClick_Eql() {
@@ -397,6 +427,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String temp = s.Calculat();
         BigDecimal db = new BigDecimal(temp);
         st_Rst = " =" + db.toPlainString();
+       /* st_Rst = s.Calculat();*/
     }
 
     private boolean isOperator(char c){//如果输入的为运算符返回真

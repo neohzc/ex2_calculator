@@ -9,7 +9,7 @@ import java.util.*;
 public class Calculate {
     private final static String TAG = "CALCILATING:";
     static char num[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
-    static char ope[] = {'=', '+', '-', '×', '÷', '(', ')'};
+    static char ope[] = {'=', '+', '-', '×', '÷', '(', ')','√','^'};
 
 
     private String st_Pln;
@@ -31,11 +31,10 @@ public class Calculate {
         for (int i = 0; i < strings.length; i++) {
             st_Pln += strings[i];
         }
+//用后缀表达式进行计算
+        /*return st_Pln;*/
 
-        //return st_Pln;
-        //用后缀表达式进行计算
         doCalculate(strings);
-
         return getSt_Rst();
     }
 
@@ -47,16 +46,37 @@ public class Calculate {
         pln = pln.replace("×", "|×|");
         pln = pln.replace("÷", "|÷|");
         pln = pln.replace("=", "|=");
+        pln = pln.replace("(", "|(|");
+        pln = pln.replace(")", "|)|");
+        pln = pln.replace("√", "|√|");
+        pln = pln.replace("^", "|^|");
+
+        pln = pln.replace("||", "|");
+
+        if(pln.charAt(0)=='|')
+            pln=pln.substring(1,pln.length());
+        int pwNumber = 0;
+        for(int t=0;t<pln.length();t++){
+            if (pln.charAt(t)=='('||pln.charAt(t)==')')
+                pwNumber++;
+        }//去除括号数
 
         String[] strings = pln.split("\\|");
-        String[] pxF = new String[strings.length];
+        String[] pxF = new String[strings.length-pwNumber];
         Stack<String> ope = new Stack<String>();
-        // return  strings;
+         /*return  strings;*/
 
         int t = 0;
         for (int pos = 0; pos < strings.length; pos++) {
             if (isOperator(strings[pos].charAt(0))) {
-                if (ope.empty() || higherPre(ope.peek().charAt(0), strings[pos].charAt(0)))
+               /* */if(strings[pos].charAt(0)=='(')
+                    ope.push(strings[pos]);
+                else if(strings[pos].charAt(0)==')'){
+                    while (!ope.empty() &&ope.peek().charAt(0)!='(')
+                        pxF[t++] = String.valueOf(ope.pop());
+                    ope.pop();//remove '('
+                }
+                else if (ope.empty() || higherPre(ope.peek().charAt(0), strings[pos].charAt(0)))
                     ope.push(strings[pos]);
                 else {
                     while (!ope.empty() &&
@@ -82,9 +102,15 @@ public class Calculate {
         double a = 0, b = 0;
         for (int pos = 0; pos < strings.length-1; pos++) {
             if (isOperator(strings[pos].charAt(0))) {
-                b = num.pop();
-                a = num.pop();
-                num.push(doOperator(a,b,strings[pos]));
+                if(strings[pos].charAt(0)!='√'){
+                    b = num.pop();
+                    a = num.pop();
+                    num.push(doOperator(a,b,strings[pos]));
+                }else{
+                    a = num.pop();
+                    num.push(Math.sqrt(a));
+                }
+
             } else
                 num.push(Double.valueOf(strings[pos]));
         }
@@ -106,6 +132,9 @@ public class Calculate {
                 return b1.multiply(b2).doubleValue();
             case "÷":
                 return b1.divide(b2,10,BigDecimal.ROUND_HALF_UP).doubleValue();
+            case "^":
+                b1 = new BigDecimal(Double.toString(Math.pow(a,b)));
+                return b1.doubleValue();
         }
         return -1;
     }
@@ -128,7 +157,7 @@ public class Calculate {
          * 比较当前扫描到的运算符是否比栈顶运算符优先级高
          * 高则压栈  return 1 ，等或低则出栈-1
          * */
-        char ope[] = {'=', ')', '+', '-', '×', '÷', '('};
+        char ope[] = {'=', '^', '+', '-', '×', '÷', '!'};
         int it = 0, in = 0;
         switch (top) {
             case '=':
@@ -146,12 +175,13 @@ public class Calculate {
             case '÷':
                 it = 2;
                 break;
-            case '(':
+            case '^':
                 it = 3;
                 break;
-            case ')':
-                it = 3;
+            case '√':
+                it = 4;
                 break;
+
         }
         switch (now) {
             case '=':
@@ -169,11 +199,11 @@ public class Calculate {
             case '÷':
                 in = 2;
                 break;
-            case '(':
+            case '^':
                 in = 3;
                 break;
-            case ')':
-                in = 3;
+            case '√':
+                in = 4;
                 break;
         }
         if (it < in) return true;
